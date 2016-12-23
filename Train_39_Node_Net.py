@@ -45,7 +45,7 @@ def constructNet(input_dim=784,n_hidden=1000,n_out=1000,nb_filter=50,prob=0.5,lr
     a = input_img
 
     a1 = AtrousConvolution2D(nb_filters, 3, 3,atrous_rate=(1,1),border_mode='same')(a)    
-    b = AtrousConvolution2D(nb_filters, 3, 3,atrous_rate=(1,1),border_mode='same')(a)  
+    b = AtrousConvolution2D(nb_filters, 3, 3,atrous_rate=(1,1),border_mode='same')(a)  #We only use the diagonal output from this, TODO: only filter diagonal
     a2=Lambda(GetDiag, output_shape=out_diag_shape)(b)
     comb=merge([a1,a2],mode='sum')
     comb = BatchNormalization()(comb)  
@@ -54,7 +54,7 @@ def constructNet(input_dim=784,n_hidden=1000,n_out=1000,nb_filter=50,prob=0.5,lr
     l=5
     for i in range(1,l):
         a1 = AtrousConvolution2D(nb_filters, 3, 3,atrous_rate=(l,l),border_mode='same')(a)    
-        b = AtrousConvolution2D(nb_filters, 3, 3,atrous_rate=(l,l),border_mode='same')(a)  
+        b = AtrousConvolution2D(nb_filters, 3, 3,atrous_rate=(l,l),border_mode='same')(a)  #We only use the diagonal output from this, TODO: only filter diagonal
         a2=Lambda(GetDiag, output_shape=out_diag_shape)(b)
         comb=merge([a1,a2],mode='sum')
         comb = BatchNormalization()(comb)  
@@ -114,7 +114,8 @@ def evalData(z,test_set_y):
     Pk50=Pk50/Q
     Pk37=Pk37/Q
     cross=metrics.log_loss(test_set_y,z)
-    print 'AP',ap,'AUC',auc,'MSE',np.mean((diff)**2),'Cross-entropy:',cross
+    print '\n'
+    print 'AUC',auc,'MSE',np.mean((diff)**2),'Cross-entropy:',cross
     print 'Precision at k=10: ',Pk10,' k=20: ',Pk20,' k=30: ',Pk30,' k=50: ',Pk50, ' k=37: ',Pk37
     return Pk37
 
@@ -123,28 +124,6 @@ def toPartialCorr(Prec):
     P=Prec.copy()
     D=np.outer(D,D)
     return -P/np.sqrt(D)
-def datagenerate(n_samp,n_features,alph,trainset=10000,repeats=10,testset=50,random_state=0,td=True):
-    true_covariances,true_precisions,noised_covariances,sigs=generate_cov_learn_dataset_repeat(n_signals=n_samp,n_features=n_features,repeats=repeats,n_samples=trainset,alpha=alph,random_state=random_state)
-        
-    train_set_y=np.array([np.ravel(np.abs(toPartialCorr(M))) for M in true_precisions])
-   # train_set_y[train_set_y!=0]=1
-
-    if(td):
-        train_set_x=np.expand_dims(np.array([(M) for M in noised_covariances]),axis=1)
-    else:
-        train_set_x=np.array([spd_to_vector(M) for M in noised_covariances])
-
-    true_covariances,true_precisions,noised_covariances,sigs=generate_cov_learn_dataset_repeat(n_signals=n_samp,n_features=n_features,repeats=1,n_samples=testset,alpha=alph,random_state=123456+trainset)
-        
-    test_set_y=np.array([np.abs(spd_to_vector_nondiag(toPartialCorr(M))) for M in true_precisions])
-    test_set_y[test_set_y!=0]=1    
-    if(td):
-        test_set_x=np.expand_dims(np.array([(M) for M in noised_covariances]),axis=1)
-    else:
-        test_set_x=np.array([spd_to_vector(M) for M in noised_covariances])
-    test_set_sigs=sigs
-    
-    return train_set_x,train_set_y,test_set_x,test_set_y,test_set_sigs
     
 def datagenerate2(n_samp,n_features,alph,trainset=10000,repeats=10,testset=50,random_state=0,td=True):
     true_covariances,true_precisions,noised_covariances,sigs=generate_cov_learn_dataset_repeat(n_signals=n_samp,n_features=n_features,repeats=repeats,n_samples=trainset,alpha=alph,normalize=True,random_state=random_state)

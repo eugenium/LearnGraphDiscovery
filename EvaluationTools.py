@@ -190,7 +190,6 @@ def evalData2(PredAdjs,TrueAdjs,text='Data ',Latex=False,torep=37):
     Pk30=0
     Pk37_t=[]
     Pk50=0
-    APs=[]
     auc2=[]
     CEs=[]
     nan_trials=[]
@@ -207,9 +206,7 @@ def evalData2(PredAdjs,TrueAdjs,text='Data ',Latex=False,torep=37):
             fpr, tpr, thresholds = metrics.roc_curve(TrueAdjs[i],PredAdjs[i], pos_label=1)
             auc2.append(metrics.auc(fpr, tpr))
             CEs.append(metrics.mean_absolute_error(TrueAdjs[i],PredAdjs[i]))
-            APs.append(metrics.average_precision_score(TrueAdjs[i].ravel(),PredAdjs[i].ravel()))
     precision,recall,_=metrics.precision_recall_curve(TrueAdjs.ravel(),PredAdjs.ravel(),pos_label=1)
-    AP=metrics.average_precision_score(TrueAdjs.ravel(),PredAdjs.ravel())#metrics.fbeta_score(TrueAdjs.ravel(),PredAdjs.ravel(), beta=1,pos_label=1)
     cross=metrics.log_loss(TrueAdjs.ravel(),PredAdjs.ravel())
     
     fpr, tpr, thresholds = metrics.roc_curve(TrueAdjs.ravel(),PredAdjs.ravel(), pos_label=1)
@@ -240,8 +237,7 @@ def evalData2(PredAdjs,TrueAdjs,text='Data ',Latex=False,torep=37):
         #print '& %s & %.3f $\pm$ %.3f &%.3f $\pm$ %.3f& %.3f $\pm$ %.3f  & %.2f $\pm$ %.2f \\\\'%(text,Pk37,2*Pk37ste,APs,APste,auc,2*aucSte,CEs,2*CESte)
         print '& %s & %.3f $\pm$ %.3f & %.3f $\pm$ %.3f  & %.3f $\pm$ %.3f \\\\'%(text,Pk37,Pk37ste,auc,aucSte,CEs,CESte)
     else:
-        print '%s|AP:%.3f|AUC:%.2f|Prec@k=(10,20,30,37,6237)=(%.2f,%.2f,%.2f,%.2f,%.2f)|logloss:%.2f|MAE:%.2f'%(text,
-                                                                                                     AP,auc,Pk10,
+        print '%s|AUC:%.2f|Prec@k=(10,20,30,37)=(%.2f,%.2f,%.2f,%.2f,%.2f)|logloss:%.2f|MAE:%.2f'%(text,auc,Pk10,
                                                                                                      Pk20,Pk30,
                                                                                                      Pk37,Pk50,
                                                                                                      cross,CE)
@@ -264,5 +260,3 @@ def evalData2(PredAdjs,TrueAdjs,text='Data ',Latex=False,torep=37):
     data['nan']=nan_trials
     return data
     
-
-import sys
