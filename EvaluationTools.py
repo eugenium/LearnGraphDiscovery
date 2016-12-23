@@ -219,6 +219,6 @@ def evalData2(PredAdjs,TrueAdjs,text='Data ',Latex=False,torep=37):
         CEs=np.mean(CEs)
         print '& %s & %.3f $\pm$ %.3f & %.3f $\pm$ %.3f  & %.3f $\pm$ %.3f \\\\'%(text,Pk37,Pk37ste,auc,aucSte,CEs,CESte)
     else:
-        print '%s|AUC:%.2f|Prec@5%:%.2f|logloss:%.2f|MAE:%.2f'%(text,auc,Pk37,cross,CE)
+        print '%s|AUC:%.2f|Prec@5\%:%.2f|logloss:%.2f|MAE:%.2f'%(text,auc,Pk37,cross,CE)
 
     
