@@ -4,7 +4,7 @@ from sklearn.covariance.graph_lasso_ import graph_lasso_path
 import numpy as np
 
 from scipy import stats
-evalonly=False #R dependencies
+evalonly=True #R dependencies
 if(not evalonly):
     import rpy2
     import readline
@@ -14,7 +14,6 @@ if(not evalonly):
     bdgraph=importr("BDgraph")
     rags2ridges=importr("rags2ridges")
     
-    from sklearn.covariance import GraphLassoCV,LedoitWolf
     from GenSynthCov_Laplace import Gen_Laplace,generate_signal_from_covariance
 
 def toPartialCorr(Prec):
@@ -185,11 +184,7 @@ def evalData2(PredAdjs,TrueAdjs,text='Data ',Latex=False,torep=37):
     test_set_y=TrueAdjs
     z=PredAdjs
     Q=test_set_y.shape[0]
-    Pk10=0
-    Pk20=0
-    Pk30=0
     Pk37_t=[]
-    Pk50=0
     auc2=[]
     CEs=[]
     nan_trials=[]
@@ -198,11 +193,7 @@ def evalData2(PredAdjs,TrueAdjs,text='Data ',Latex=False,torep=37):
             nan_trials.append(i)
             print(i)
         else:
-            Pk10+=ranking_precision_score(test_set_y[i], z[i], k=10)
-            Pk20+=ranking_precision_score(test_set_y[i], z[i], k=20)
-            Pk30+=ranking_precision_score(test_set_y[i], z[i], k=30)
             Pk37_t.append(ranking_precision_score(test_set_y[i], z[i], k=torep))
-            Pk50+=ranking_precision_score(test_set_y[i], z[i], k=50)
             fpr, tpr, thresholds = metrics.roc_curve(TrueAdjs[i],PredAdjs[i], pos_label=1)
             auc2.append(metrics.auc(fpr, tpr))
             CEs.append(metrics.mean_absolute_error(TrueAdjs[i],PredAdjs[i]))
@@ -218,45 +209,16 @@ def evalData2(PredAdjs,TrueAdjs,text='Data ',Latex=False,torep=37):
     
     
         
-    Pk10=Pk10/Q
-    Pk20=Pk20/Q
-    Pk30=Pk30/Q
     Pk37=np.sum(Pk37_t)/Q
-    Pk50=Pk50/Q
     
     CE=metrics.mean_absolute_error(TrueAdjs.ravel(),PredAdjs.ravel())
     if(Latex):
         Pk37ste=stats.sem(Pk37_t)
         aucSte=stats.sem(auc2)
         CESte=stats.sem(CEs)
-        APste=stats.sem(APs)
-        APs=np.mean(APs)
         CEs=np.mean(CEs)
-        #print Pk37_t
-       # print '%s & %.3f & %.3f & %.2f & %.2f & %.3f & %.2f'%(text,cross,auc,Pk20,Pk37,AP,CE)
-        #print '& %s & %.3f $\pm$ %.3f &%.3f $\pm$ %.3f& %.3f $\pm$ %.3f  & %.2f $\pm$ %.2f \\\\'%(text,Pk37,2*Pk37ste,APs,APste,auc,2*aucSte,CEs,2*CESte)
         print '& %s & %.3f $\pm$ %.3f & %.3f $\pm$ %.3f  & %.3f $\pm$ %.3f \\\\'%(text,Pk37,Pk37ste,auc,aucSte,CEs,CESte)
     else:
-        print '%s|AUC:%.2f|Prec@k=(10,20,30,37)=(%.2f,%.2f,%.2f,%.2f,%.2f)|logloss:%.2f|MAE:%.2f'%(text,auc,Pk10,
-                                                                                                     Pk20,Pk30,
-                                                                                                     Pk37,Pk50,
-                                                                                                     cross,CE)
-    #print 'Precision at k=10:',Pk10,' k=20:',Pk20,' k=30',Pk30,' k=50:',Pk50
-    #print 'Calibration Error',CE
-    
-    
-   # TotalEdges=(TrueAdjs[0].shape[0])*(TrueAdjs[0].shape[0]-1)/2
-    
-   # max_found=max(np.sum(TrueAdjs>0,axis=1)
-    data=dict()
-    data['precision']=precision
-    data['recall']=recall
-    data['AP']=AP
-    data['Cross']=cross
-    data['CE']=CE
-    data['fpr']=fpr
-    data['tpr']=tpr
-    data['auc']=auc
-    data['nan']=nan_trials
-    return data
+        print '%s|AUC:%.2f|Prec@5%:%.2f|logloss:%.2f|MAE:%.2f'%(text,auc,Pk37,cross,CE)
+
     
