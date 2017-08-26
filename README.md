@@ -1,6 +1,7 @@
 # LearnGraphDiscovery
 
-Example code for the paper https://openreview.net/pdf?id=HJOZBvcel
+Example code for the paper https://arxiv.org/abs/1605.06359
+Please cite our ICML paper if you find this code useful
 
 Basic python dependencies needed:
 sklearn
