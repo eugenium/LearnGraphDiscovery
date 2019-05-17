@@ -17,4 +17,4 @@ The example is simply using our own data generator. In order to evaluate on simi
 ## Train and model specification
 To train your own model or see the model specifications run Train_39_Node_Net.py
 
-For questions or bug reports please contact eugene.belilovsky@inria.fr
+For questions or bug reports please contact eugene.belilovsky@umontreal.ca
